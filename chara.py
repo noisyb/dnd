@@ -1,18 +1,29 @@
-import dice, math
+import dice, math, configparser
 
+config = configparser.ConfigParser()
+config.read('./config/5e.ini')
+
+#Ability score constants
 ABILITY_SCORE_NAMES = ['str','dex','con','int','wis','cha']
 ABILITY_NAME_ERR = Exception('Ability not in recognized list')
-CHAR_CLASSES = ['barb','bard','cler','drui','figh','monk','pala','rang','rogu','sorc','warl','wiza']
-SKILL_DICT = dict(acro='dex',anim='wis',arca='int',athl='str',dece='cha',hist='int',insi='wis',inti='cha',inve='int',medi='wis',natu='int',perc='wis',perf='cha',pers='cha',reli='int',slei='dex',stea='dex',surv='wis')
+ABILITY_VAL_ERR = Exception('Ability int too low or high')
+
+#Class constants
+CLASS_DICT = config['classes']
+CLASS_NAMES = []
+for key, val in CLASS_DICT.items():
+	CLASS_NAMES.append(key)
+
+#Skill constants
+SKILL_ABI = config['skill_abi']
 SKILL_NAMES = []
-for key in SKILL_DICT.items():
+for key, val in SKILL_ABI.items():
 	SKILL_NAMES.append(key)
+
+#Level constants
 LVL_CHART = [300,900,2700,6500,14000,23000,34000,48000,64000,85000,100000,120000,140000,165000,195000,225000,265000,305000,355000]
 
-class ability_scores:
-
-	def __init__(self):
-		self._scores = dict()
+ALIGNMENTS = ['LG','NG','CG','LN','NN','CN','LE','NE','CE']
 
 class character:
 
@@ -24,7 +35,7 @@ class character:
 		self.bkg = ''
 		#who plays it (can be dm)
 		self.player = ''
-		self.class_ = ''
+		self._class = ''
 		self.race = ''
 		self.alignment = ''
 		self.char_desc = ''
@@ -33,10 +44,39 @@ class character:
 		self.feats = []
 		self.spells = []
 
+	#Pretty Print character or single section	
+	def p_print(self,section='full'):
+		
+		print ('\nCharacter: ' + self.name)
+		print ('Level/Class: ' + str(self.lvl) + ' ' + self.class_name) #FIXME - change class access to a pretty name
+		if section in ['full','abi']:
+			print('---ABILITY SCORES---')
+			for x in ABILITY_SCORE_NAMES:
+				print(x + ': ' + str(self.abi_get(x)) + ' : ' + str(self.abi_mod(x)))
+
+		if section in ['full','ski']:
+			print('---SKILL MODIFIERS---')
+			for x in SKILL_NAMES:
+				skill_string = x + ': ' + str(self.ski_mod(x))
+				if x in self.skills: skill_string += ' X'
+				print(skill_string)
+	
+	@property
+	def class_abrv(self):
+		return self._class
+
+	@class_abrv.setter
+	def class_abrv(self,abrv_name):
+		self._class = abrv_name
+
+	@property
+	def class_name(self):
+		return CLASS_DICT[self._class]
+
 	def abi_set(self,**kwargs):
 		for key, val in kwargs.items():
 			if val < 0 or val > 40:
-				raise ABILITY_NAME_ERR #FIXME
+				raise ABILITY_VAL_ERR
 			if key not in ABILITY_SCORE_NAMES:
 				raise ABILITY_NAME_ERR 
 			self.abi[key] = val
@@ -46,6 +86,7 @@ class character:
 			raise ABILITY_NAME_ERR
 		return self.abi[ability]
 
+	#Modifier derived from ability score
 	def abi_mod(self,ability):
 		if ability not in ABILITY_SCORE_NAMES:
 			raise ABILITY_CALL_ERR
@@ -61,6 +102,7 @@ class character:
 	def xp(self, value):
 		self._xp = value
 
+	#Returns level as int
 	@property
 	def lvl(self):
 		xp = self._xp
@@ -72,6 +114,7 @@ class character:
 			lvl += 1
 		return 20
 	
+	#Convert level number to minimum possible XP
 	@lvl.setter
 	def lvl(self,value):
 		self._xp = 0
@@ -83,14 +126,15 @@ class character:
 				xp += lvl_xp
 		self._xp = xp
 		
-
+	#Proficiency score derived from level
 	@property
 	def prof(self):
 		level = self.lvl
 		return int(2+((level-1)/4))
-
+	
+	#Skill modifier per skill
 	def ski_mod(self,skill):
 		skill_mod = 0
 		if skill in self.skills: skill_mod += self.prof
-		skill_mod += self.abi_mod(SKILL_DICT[skill])
+		skill_mod += self.abi_mod(SKILL_ABI[skill])
 		return skill_mod

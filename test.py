@@ -1,4 +1,4 @@
-import unittest, dice, chara
+import unittest, dice, chara, randchara
 
 class dice_rolls(unittest.TestCase):
 
@@ -46,10 +46,15 @@ class characters(unittest.TestCase):
 			a = char1.skills[0]
 		char0.lvl = 5
 		self.assertEqual(char0.ski_mod('arca'),-2)
-			
+	
+	def test_rand_char(self):
+		random_fighter = randchara.full_rand_char('figh')
+		random_fighter.name = 'Random Fighter'
+		random_fighter.p_print()
 
 	def test_grex(self):
 		grex = chara.character()
+		grex.name = 'Grex Arkon'
 		grex.abi_set(str=20,dex=14,con=15,int=14,wis=11,cha=16)	
 		self.assertEqual(grex.abi_mod('str'),5)
 		self.assertEqual(grex.abi_mod('dex'),2)
@@ -57,6 +62,7 @@ class characters(unittest.TestCase):
 		self.assertEqual(grex.abi_mod('int'),2)
 		self.assertEqual(grex.abi_mod('wis'),0)
 		self.assertEqual(grex.abi_mod('cha'),3)
+		grex.class_abrv = 'figh'
 		grex.xp = 4584 
 		self.assertEqual(grex.lvl,4)
 		self.assertEqual(grex.prof,2)
@@ -65,7 +71,8 @@ class characters(unittest.TestCase):
 		self.assertEqual(grex.ski_mod('anim'),0)
 		self.assertEqual(grex.ski_mod('arca'),2)
 		self.assertEqual(grex.ski_mod('athl'),7)
-
+		
+		grex.p_print()
 		
 
 if __name__=='__main__':
