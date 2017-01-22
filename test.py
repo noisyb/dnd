@@ -1,4 +1,5 @@
-import unittest, dice, chara, randchara
+import unittest, random
+import dice, chara, randchara
 
 class dice_rolls(unittest.TestCase):
 
@@ -49,12 +50,12 @@ class characters(unittest.TestCase):
 	
 	def test_rand_char(self):
 		random_fighter = randchara.full_rand_char('figh')
-		random_fighter.name = 'Random Fighter'
 		random_fighter.p_print()
 
 	def test_grex(self):
 		grex = chara.character()
 		grex.name = 'Grex Arkon'
+		grex.race_abrv = 'sildrag'
 		grex.abi_set(str=20,dex=14,con=15,int=14,wis=11,cha=16)	
 		self.assertEqual(grex.abi_mod('str'),5)
 		self.assertEqual(grex.abi_mod('dex'),2)

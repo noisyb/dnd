@@ -1,7 +1,8 @@
-import dice, math, configparser
+import math, configparser
+import dice
 
-config = configparser.ConfigParser()
-config.read('./config/5e.ini')
+ez_config = configparser.ConfigParser()
+ez_config.read('./config/5e.ini')
 
 #Ability score constants
 ABILITY_SCORE_NAMES = ['str','dex','con','int','wis','cha']
@@ -9,21 +10,36 @@ ABILITY_NAME_ERR = Exception('Ability not in recognized list')
 ABILITY_VAL_ERR = Exception('Ability int too low or high')
 
 #Class constants
-CLASS_DICT = config['classes']
-CLASS_NAMES = []
+CLASS_DICT = ez_config['class_names']
+CLASS_ABRV = []
 for key, val in CLASS_DICT.items():
-	CLASS_NAMES.append(key)
+	CLASS_ABRV.append(key)
 
 #Skill constants
-SKILL_ABI = config['skill_abi']
-SKILL_NAMES = []
+SKILL_ABI = ez_config['skill_abi']
+SKILL_ABRV = []
 for key, val in SKILL_ABI.items():
-	SKILL_NAMES.append(key)
+	SKILL_ABRV.append(key)
+SKILL_NAMES = ez_config['skill_names']
 
 #Level constants
 LVL_CHART = [300,900,2700,6500,14000,23000,34000,48000,64000,85000,100000,120000,140000,165000,195000,225000,265000,305000,355000]
 
 ALIGNMENTS = ['LG','NG','CG','LN','NN','CN','LE','NE','CE']
+
+#Race information/modifiers/extra abilities
+
+race_config = configparser.ConfigParser()
+race_config.read('./config/5e_races.ini')
+
+RACE_ABRV = race_config.sections()
+RACE_NAMES = dict()
+for x in RACE_ABRV:
+	RACE_NAMES[x] = race_config[x]['name']
+
+
+#Effectively, lots of abilities have common damage, mods, range attributes, 
+#might be worth making a config file parser for it
 
 class character:
 
@@ -36,7 +52,7 @@ class character:
 		#who plays it (can be dm)
 		self.player = ''
 		self._class = ''
-		self.race = ''
+		self._race = ''
 		self.alignment = ''
 		self.char_desc = ''
 		self.skills = []
@@ -48,19 +64,33 @@ class character:
 	def p_print(self,section='full'):
 		
 		print ('\nCharacter: ' + self.name)
-		print ('Level/Class: ' + str(self.lvl) + ' ' + self.class_name) #FIXME - change class access to a pretty name
+		print ('Race: ' + self.race_name)
+		print ('Level/Class: ' + str(self.lvl) + ' ' + self.class_name)
 		if section in ['full','abi']:
 			print('---ABILITY SCORES---')
 			for x in ABILITY_SCORE_NAMES:
 				print(x + ': ' + str(self.abi_get(x)) + ' : ' + str(self.abi_mod(x)))
 
 		if section in ['full','ski']:
-			print('---SKILL MODIFIERS---')
-			for x in SKILL_NAMES:
-				skill_string = x + ': ' + str(self.ski_mod(x))
+			print('----SKILL MODIFIERS----')
+			for x in SKILL_ABRV:
+				skill_string = '{:<17} {:>3}'.format(SKILL_NAMES[x] + ': ', str(self.ski_mod(x)))
 				if x in self.skills: skill_string += ' X'
 				print(skill_string)
 	
+	@property
+	def race_abrv(self):
+		return self._race
+
+	@race_abrv.setter
+	def race_abrv(self,abrv):
+		self._race = abrv
+
+	@property
+	def race_name(self):
+		name = RACE_NAMES[self._race]
+		return name
+
 	@property
 	def class_abrv(self):
 		return self._class
