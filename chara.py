@@ -7,7 +7,7 @@ ez_config.read('./config/5e.ini')
 #Ability score constants
 ABILITY_SCORE_NAMES = ['str','dex','con','int','wis','cha']
 ABILITY_NAME_ERR = Exception('Ability not in recognized list')
-ABILITY_VAL_ERR = Exception('Ability int too low or high')
+ABILITY_VAL_ERR = Exception('Ability integer too low or high')
 
 #Class constants
 CLASS_DICT = ez_config['class_names']

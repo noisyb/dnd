@@ -56,6 +56,7 @@ class characters(unittest.TestCase):
 		grex = chara.character()
 		grex.name = 'Grex Arkon'
 		grex.race_abrv = 'sildrag'
+		grex.alignment = 'NG'
 		grex.abi_set(str=20,dex=14,con=15,int=14,wis=11,cha=16)	
 		self.assertEqual(grex.abi_mod('str'),5)
 		self.assertEqual(grex.abi_mod('dex'),2)
