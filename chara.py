@@ -25,7 +25,10 @@ SKILL_NAMES = ez_config['skill_names']
 #Level constants
 LVL_CHART = [300,900,2700,6500,14000,23000,34000,48000,64000,85000,100000,120000,140000,165000,195000,225000,265000,305000,355000]
 
-ALIGNMENTS = ['LG','NG','CG','LN','NN','CN','LE','NE','CE']
+ALIGNMENT_ABRV = []
+ALIGNMENT_DICT = ez_config['alignment_names']
+for key, val in ALIGNMENT_DICT.items():
+	ALIGNMENT_ABRV.append(key)
 
 #may need to load from config since each effect alters different character abilities
 STATUS_EFFECTS = ['blind','charmed','deaf','exhausted','frightened','incapacitated','invisible','paralyzed','petrified','poisoned','prone','restrained','stunned','unconscious']
@@ -75,6 +78,8 @@ class character:
 		print ('\nCharacter: ' + self.name)
 		print ('Race: ' + self.race_name)
 		print ('Level/Class: ' + str(self.lvl) + ' ' + self.class_name)
+		print ('Max Hp: ' + str(self.max_hp))
+		print ('Alignment: ' + self.alignment_name)
 		if section in ['full','abi']:
 			print('---ABILITY SCORES---')
 			for x in ABILITY_SCORE_NAMES:
@@ -131,7 +136,8 @@ class character:
 		
 		if type_of in ['list of player abilities which reduce damage']:
 			#FIXME - do the appropriate reduction/increase
-			pass
+			amount /= 2
+			amount *= 2
 		
 		self._temphp -= amount
 
@@ -152,13 +158,20 @@ class character:
 
 	def set_temphp(self,amount):
 		self._temphp = amount
-
+	
+	#Alignment pretty name
+	@property
+	def alignment_name(self):
+		return ALIGNMENT_DICT[self.alignment]
+	
+	#Race related functions
 	@property
 	def race_abrv(self):
 		return self._race
 
 	@race_abrv.setter
 	def race_abrv(self,abrv):
+		#FIXME - set the race abilities and other features here
 		self._race = abrv
 
 	@property
@@ -166,6 +179,7 @@ class character:
 		name = RACE_NAMES[self._race]
 		return name
 
+	#Class related functions
 	@property
 	def class_abrv(self):
 		return self._class
@@ -178,6 +192,7 @@ class character:
 	def class_name(self):
 		return CLASS_DICT[self._class]
 
+	#Ability related functions
 	def abi_set(self,**kwargs):
 		for key, val in kwargs.items():
 			if val < 0 or val > 40:
@@ -199,6 +214,7 @@ class character:
 		if score < 10: score -= 1
 		return math.trunc((score-10)/2)
 
+	#XP and Level related functions
 	@property
 	def xp(self):
 		return self._xp
@@ -230,6 +246,15 @@ class character:
 				lvl_xp = LVL_CHART[y]
 				xp += lvl_xp
 		self._xp = xp
+
+	#FIXME - Levels the character up - rather than just setting their xp etc.
+	#This is the stuff where we get to setting abilities per class, rolling hp
+	#First level levelling could potentially include a more detailed character prompt
+	def gain_xp(self):
+		pass
+
+	def gain_levels(self):
+		pass
 		
 	#Proficiency score derived from level
 	@property

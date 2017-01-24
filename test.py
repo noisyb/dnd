@@ -3,13 +3,12 @@ import dice, chara, randchara
 
 class dice_rolls(unittest.TestCase):
 
-	def setUp(self):
+	def test_rolling(self):
 		test_dice = dice.dice_group(sides=20,num=100,type_of='test')
-		print(test_dice.result)
+		print('\n---D20 ROLLS---')
+		print(sorted(test_dice.result))
 
-#	def test_rolling(self):
-
-class characters(unittest.TestCase):
+class character_generics(unittest.TestCase):
 	
 	def test_char_abilities(self):
 		char0 = chara.character()
@@ -59,10 +58,18 @@ class characters(unittest.TestCase):
 		self.assertEqual(char0.missing_hp,0)
 		self.assertFalse('incapacitated' in char0.status_effects)
 		self.assertFalse('unconscious' in char0.status_effects)
+		char0.set_temphp(12)
+		self.assertEqual(char0.hp,22)
+		char0.set_temphp(11)
+		self.assertEqual(char0.hp,21)
+
+class random_characters(unittest.TestCase):
 
 	def test_rand_char(self):
 		random_fighter = randchara.full_rand_char('figh')
 		random_fighter.p_print()
+
+class input_characters(unittest.TestCase):
 
 	def test_grex(self):
 		grex = chara.character()
@@ -90,6 +97,5 @@ class characters(unittest.TestCase):
 		
 		grex.p_print()
 		
-
 if __name__=='__main__':
 	unittest.main()
