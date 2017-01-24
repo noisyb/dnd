@@ -1,6 +1,8 @@
 import math, configparser
 import dice
 
+#FIXME - look to move this section loading data to a different module
+
 ez_config = configparser.ConfigParser()
 ez_config.read('./config/5e.ini')
 
@@ -30,7 +32,8 @@ ALIGNMENT_DICT = ez_config['alignment_names']
 for key, val in ALIGNMENT_DICT.items():
 	ALIGNMENT_ABRV.append(key)
 
-#may need to load from config since each effect alters different character abilities
+#may need to load from config which loads into a dict since each effect 
+#alters different character abilities
 STATUS_EFFECTS = ['blind','charmed','deaf','exhausted','frightened','incapacitated','invisible','paralyzed','petrified','poisoned','prone','restrained','stunned','unconscious']
 
 #Race information/modifiers/extra abilities
@@ -104,6 +107,8 @@ class character:
 		removed_statuses = []
 		for key, val in self._status.items():
 			val.remove(reason)
+			#if no more reasons for a particular
+			#status are left remove it
 			if not val: removed_statuses.append(key)
 		for key in removed_statuses:
 			del self._status[key]
@@ -223,7 +228,7 @@ class character:
 	def xp(self, value):
 		self._xp = value
 
-	#Returns level as int
+	#Returns level as integer
 	@property
 	def lvl(self):
 		xp = self._xp
@@ -236,6 +241,7 @@ class character:
 		return 20
 	
 	#Convert level number to minimum possible XP
+	#and set the XP to that number
 	@lvl.setter
 	def lvl(self,value):
 		self._xp = 0

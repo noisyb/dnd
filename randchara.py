@@ -10,7 +10,23 @@ ARCHETYPE_OPTS = dict( \
 	lvl=5,align='CE') \
 	)
 
-def full_rand_char(archetype,opt_dict=None):
+
+#FIXME - I'm thinking now it makes a lot of sense to ingest config
+#files into a class for 'archetypes' and then feed that to the generation
+#functions.
+class character_template:
+	pass
+
+def level_gold(lvl):
+	#FIXME - returns the amount of gold a character of a level could conceiveably had
+	#maybe poor chars are -1 level, rich +1
+	pass
+
+def treasure_randomiser(gp,type_of):
+	#FIXME - generates loot a particular character might have near/on em
+	pass
+
+def rand_char(archetype,opt_dict=None):
 	if opt_dict==None:
 		options = ARCHETYPE_OPTS[archetype]
 	else:

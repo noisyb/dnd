@@ -66,7 +66,7 @@ class character_generics(unittest.TestCase):
 class random_characters(unittest.TestCase):
 
 	def test_rand_char(self):
-		random_fighter = randchara.full_rand_char('figh')
+		random_fighter = randchara.rand_char('figh')
 		random_fighter.p_print()
 
 class input_characters(unittest.TestCase):
