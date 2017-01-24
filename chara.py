@@ -27,6 +27,9 @@ LVL_CHART = [300,900,2700,6500,14000,23000,34000,48000,64000,85000,100000,120000
 
 ALIGNMENTS = ['LG','NG','CG','LN','NN','CN','LE','NE','CE']
 
+#may need to load from config since each effect alters different character abilities
+STATUS_EFFECTS = ['blind','charmed','deaf','exhausted','frightened','incapacitated','invisible','paralyzed','petrified','poisoned','prone','restrained','stunned','unconscious']
+
 #Race information/modifiers/extra abilities
 
 race_config = configparser.ConfigParser()
@@ -59,6 +62,12 @@ class character:
 		self.items = dict()
 		self.feats = []
 		self.spells = []
+		#health variables
+		self._hp = 0
+		self._maxhp = 0
+		self._temphp = 0
+		#status effects
+		self._status = dict()
 
 	#Pretty Print character or single section	
 	def p_print(self,section='full'):
@@ -78,6 +87,72 @@ class character:
 				if x in self.skills: skill_string += ' X'
 				print(skill_string)
 	
+	#Status-related functions
+	def set_status(self,status_effect,reason):
+		if status_effect not in STATUS_EFFECTS: raise KeyError
+		if status_effect in self._status: 
+			self._status[status_effect].append(reason)
+		else:
+			self._status[status_effect] = [reason]
+
+	def rm_status(self,reason):
+		removed_statuses = []
+		for key, val in self._status.items():
+			val.remove(reason)
+			if not val: removed_statuses.append(key)
+		for key in removed_statuses:
+			del self._status[key]
+		
+	@property
+	def status_effects(self):
+		status_list = []
+		for key, val in self._status.items():
+			status_list.append(key)
+		return status_list
+
+	#Health management functions
+	@property
+	def hp(self):
+		return self._hp + self._temphp
+
+	@property
+	def max_hp(self):
+		return self._maxhp
+
+	@max_hp.setter
+	def max_hp(self,maxhp):
+		self._maxhp = maxhp
+
+	@property
+	def missing_hp(self):
+		return self._hp - self._maxhp
+
+	def damage(self,amount,type_of):
+		
+		if type_of in ['list of player abilities which reduce damage']:
+			#FIXME - do the appropriate reduction/increase
+			pass
+		
+		self._temphp -= amount
+
+		if self._temphp <= 0:
+			self._hp += self._temphp
+			self._temphp = 0
+
+		if self._hp <= 0:
+			self._hp = 0
+			self.set_status('unconscious','hp0')
+			self.set_status('incapacitated','hp0')
+	
+	def heal(self,amount):
+		if amount <= 0: raise Exception('Tried to heal nothing/negative')
+		self._hp += amount
+		if self._hp > self._maxhp: self._hp = self._maxhp
+		self.rm_status('hp0')
+
+	def set_temphp(self,amount):
+		self._temphp = amount
+
 	@property
 	def race_abrv(self):
 		return self._race

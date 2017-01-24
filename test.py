@@ -48,6 +48,18 @@ class characters(unittest.TestCase):
 		char0.lvl = 5
 		self.assertEqual(char0.ski_mod('arca'),-2)
 	
+	def test_char_hp(self):
+		char0 = chara.character()
+		char0.max_hp = 10
+		char0.damage(10, None)
+		self.assertEqual(char0.missing_hp,-10)
+		self.assertTrue('incapacitated' in char0.status_effects)
+		self.assertTrue('unconscious' in char0.status_effects)
+		char0.heal(20)
+		self.assertEqual(char0.missing_hp,0)
+		self.assertFalse('incapacitated' in char0.status_effects)
+		self.assertFalse('unconscious' in char0.status_effects)
+
 	def test_rand_char(self):
 		random_fighter = randchara.full_rand_char('figh')
 		random_fighter.p_print()
@@ -58,17 +70,19 @@ class characters(unittest.TestCase):
 		grex.race_abrv = 'sildrag'
 		grex.alignment = 'NG'
 		grex.abi_set(str=20,dex=14,con=15,int=14,wis=11,cha=16)	
+		grex.class_abrv = 'figh'
+		grex.xp = 4584
+		grex.skills = ['athl','inti','perf','surv']
+		grex.max_hp = 35
+
 		self.assertEqual(grex.abi_mod('str'),5)
 		self.assertEqual(grex.abi_mod('dex'),2)
 		self.assertEqual(grex.abi_mod('con'),2)
 		self.assertEqual(grex.abi_mod('int'),2)
 		self.assertEqual(grex.abi_mod('wis'),0)
 		self.assertEqual(grex.abi_mod('cha'),3)
-		grex.class_abrv = 'figh'
-		grex.xp = 4584 
 		self.assertEqual(grex.lvl,4)
 		self.assertEqual(grex.prof,2)
-		grex.skills = ['athl','inti','perf','surv']
 		self.assertEqual(grex.ski_mod('acro'),2)
 		self.assertEqual(grex.ski_mod('anim'),0)
 		self.assertEqual(grex.ski_mod('arca'),2)
