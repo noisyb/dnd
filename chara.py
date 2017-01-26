@@ -1,58 +1,14 @@
 import math, configparser
-import dice
+import dice, data_5e
 
-#FIXME - look to move this section loading data to a different module
-
-ez_config = configparser.ConfigParser()
-ez_config.read('./config/5e.ini')
-
-#Ability score constants
-ABILITY_SCORE_NAMES = ['str','dex','con','int','wis','cha']
-ABILITY_NAME_ERR = Exception('Ability not in recognized list')
-ABILITY_VAL_ERR = Exception('Ability integer too low or high')
-
-#Class constants
-CLASS_DICT = ez_config['class_names']
-CLASS_ABRV = []
-for key, val in CLASS_DICT.items():
-	CLASS_ABRV.append(key)
-
-#Skill constants
-SKILL_ABI = ez_config['skill_abi']
-SKILL_ABRV = []
-for key, val in SKILL_ABI.items():
-	SKILL_ABRV.append(key)
-SKILL_NAMES = ez_config['skill_names']
-
-#Level constants
-LVL_CHART = [300,900,2700,6500,14000,23000,34000,48000,64000,85000,100000,120000,140000,165000,195000,225000,265000,305000,355000]
-
-ALIGNMENT_ABRV = []
-ALIGNMENT_DICT = ez_config['alignment_names']
-for key, val in ALIGNMENT_DICT.items():
-	ALIGNMENT_ABRV.append(key)
-
-#may need to load from config which loads into a dict since each effect 
-#alters different character abilities
-STATUS_EFFECTS = ['blind','charmed','deaf','exhausted','frightened','incapacitated','invisible','paralyzed','petrified','poisoned','prone','restrained','stunned','unconscious']
-
-#Race information/modifiers/extra abilities
-
-race_config = configparser.ConfigParser()
-race_config.read('./config/5e_races.ini')
-
-RACE_ABRV = race_config.sections()
-RACE_NAMES = dict()
-for x in RACE_ABRV:
-	RACE_NAMES[x] = race_config[x]['name']
-
+ruleset = data_5e.rules()
 
 #Effectively, lots of abilities have common damage, mods, range attributes, 
 #might be worth making a config file parser for it
 
 class character:
 
-	def __init__(self,**kwargs):
+	def __init__(self):
 		self.abi = dict() 
 		self.name = ''
 		self._xp = 0
@@ -63,11 +19,10 @@ class character:
 		self._class = ''
 		self._race = ''
 		self.alignment = ''
-		self.char_desc = ''
 		self.skills = []
 		self.items = dict()
 		self.feats = []
-		self.spells = []
+		#FIXME - probs need to alter this structure self.spells = []
 		#health variables
 		self._hp = 0
 		self._maxhp = 0
@@ -85,19 +40,19 @@ class character:
 		print ('Alignment: ' + self.alignment_name)
 		if section in ['full','abi']:
 			print('---ABILITY SCORES---')
-			for x in ABILITY_SCORE_NAMES:
+			for x in ruleset.ability_score.names:
 				print(x + ': ' + str(self.abi_get(x)) + ' : ' + str(self.abi_mod(x)))
 
 		if section in ['full','ski']:
 			print('----SKILL MODIFIERS----')
-			for x in SKILL_ABRV:
-				skill_string = '{:<17} {:>3}'.format(SKILL_NAMES[x] + ': ', str(self.ski_mod(x)))
+			for x in ruleset.skills.abrv:
+				skill_string = '{:<17} {:>3}'.format(ruleset.skills.names[x] + ': ', str(self.ski_mod(x)))
 				if x in self.skills: skill_string += ' X'
 				print(skill_string)
 	
 	#Status-related functions
 	def set_status(self,status_effect,reason):
-		if status_effect not in STATUS_EFFECTS: raise KeyError
+		if status_effect not in ruleset.status_effects.names: raise KeyError
 		if status_effect in self._status: 
 			self._status[status_effect].append(reason)
 		else:
@@ -167,7 +122,7 @@ class character:
 	#Alignment pretty name
 	@property
 	def alignment_name(self):
-		return ALIGNMENT_DICT[self.alignment]
+		return ruleset.alignment.names[self.alignment]
 	
 	#Race related functions
 	@property
@@ -181,7 +136,7 @@ class character:
 
 	@property
 	def race_name(self):
-		name = RACE_NAMES[self._race]
+		name = ruleset.race.names[self.race_abrv]
 		return name
 
 	#Class related functions
@@ -195,26 +150,26 @@ class character:
 
 	@property
 	def class_name(self):
-		return CLASS_DICT[self._class]
+		return ruleset.class_features.names[self.class_abrv]
 
 	#Ability related functions
 	def abi_set(self,**kwargs):
 		for key, val in kwargs.items():
 			if val < 0 or val > 40:
-				raise ABILITY_VAL_ERR
-			if key not in ABILITY_SCORE_NAMES:
-				raise ABILITY_NAME_ERR 
+				raise ruleset.ability_score.val_err
+			if key not in ruleset.ability_score.names:
+				raise ruleset.ability_score.name_err
 			self.abi[key] = val
 
 	def abi_get(self,ability):
-		if ability not in ABILITY_SCORE_NAMES:
-			raise ABILITY_NAME_ERR
+		if ability not in ruleset.ability_score.names:
+			raise ruleset.ability_score.name_err
 		return self.abi[ability]
 
 	#Modifier derived from ability score
 	def abi_mod(self,ability):
-		if ability not in ABILITY_SCORE_NAMES:
-			raise ABILITY_CALL_ERR
+		if ability not in ruleset.ability_score.names:
+			raise ruleset.ability_score.name_err
 		score = self.abi[ability]
 		if score < 10: score -= 1
 		return math.trunc((score-10)/2)
@@ -233,7 +188,7 @@ class character:
 	def lvl(self):
 		xp = self._xp
 		lvl = 1
-		for x in LVL_CHART:
+		for x in ruleset.level.xp_per:
 			xp = xp - x
 			if xp < 0:
 				return lvl
@@ -249,7 +204,7 @@ class character:
 		for x in range(0,value):
 			y = x-1
 			if y >= 0:
-				lvl_xp = LVL_CHART[y]
+				lvl_xp = ruleset.level.xp_per[y]
 				xp += lvl_xp
 		self._xp = xp
 
@@ -272,5 +227,5 @@ class character:
 	def ski_mod(self,skill):
 		skill_mod = 0
 		if skill in self.skills: skill_mod += self.prof
-		skill_mod += self.abi_mod(SKILL_ABI[skill])
+		skill_mod += self.abi_mod(ruleset.skills.ability[skill])
 		return skill_mod

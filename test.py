@@ -62,6 +62,11 @@ class character_generics(unittest.TestCase):
 		self.assertEqual(char0.hp,22)
 		char0.set_temphp(11)
 		self.assertEqual(char0.hp,21)
+		char0.damage(12, None)
+		self.assertEqual(char0.hp,9)
+		char0.set_temphp(2)
+		char0.damage(3,None)
+		self.assertEqual(char0.hp,8)
 
 class random_characters(unittest.TestCase):
 
