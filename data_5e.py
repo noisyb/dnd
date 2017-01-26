@@ -5,11 +5,13 @@ class rules:
 	def __init__(self):
 		ez_config = configparser.ConfigParser()
 		ez_config.read('./config/5e.ini')
+		skill_config = configparser.ConfigParser()
+		skill_config.read('./config/5e_skills.ini')
 		race_config = configparser.ConfigParser()
 		race_config.read('./config/5e_races.ini')
 		self.ability_score = ability_score()
 		self.class_features = class_features(ez_config)
-		self.skills = skills(ez_config)
+		self.skills = skills(skill_config)
 		self.level = level()
 		self.alignment = alignment(ez_config)
 		self.status_effects = status_effects()
@@ -30,11 +32,16 @@ class class_features:
 
 class skills:
 	def __init__(self,config):
-		self.ability = config['skill_abi']
-		self.abrv = []
-		for key, val in self.ability.items():
-			self.abrv.append(key)
-		self.names = config['skill_names']
+		self.abrv = config.sections()
+		#FIXME - Refactor below as properties at some point!!!
+		#They can just access config directly, rather than via new dicts
+		#This will require a lil work in chara.py
+		#This model also works better than the dict-building in other classes here
+		self.names = dict()
+		self.ability = dict()
+		for x in self.abrv:
+			self.names[x] = config[x]['name']
+			self.ability[x] = config[x]['abi']
 
 class level:
 	def __init__(self):

@@ -1,6 +1,7 @@
 import math, configparser
 import dice, data_5e
 
+#Loads 5e rules
 ruleset = data_5e.rules()
 
 #Effectively, lots of abilities have common damage, mods, range attributes, 
