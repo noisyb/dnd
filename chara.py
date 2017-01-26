@@ -51,6 +51,9 @@ class character:
 				if x in self.skills: skill_string += ' X'
 				print(skill_string)
 	
+	#FIXME - functions below getting crowded
+	#Maybe move into classes?
+
 	#Status-related functions
 	def set_status(self,status_effect,reason):
 		if status_effect not in ruleset.status_effects.names: raise KeyError
