@@ -1,5 +1,15 @@
 import configparser
 
+		#FIXME - Refactor below dict creations as functions at some point!!!
+		#They can just access config directly, rather than via new dicts
+		#This will require a lil work in chara.py
+		#This model also works better than the dict-building in other classes here
+
+#self.abrv is standard - and a list of all possible options in the class
+#this could in future allow generic errors generated per class - Exception('Option not in ' + x + ' list')
+#also this allows something to iterate thru functions - abrv should be the transferred ID between objs and functs
+#or might just change this to 'names' as the default and remove abrv entirely
+
 class rules:
 
 	def __init__(self):
@@ -19,6 +29,7 @@ class rules:
 
 class ability_score:
 	def __init__(self):
+		#FIXME - change to abrv
 		self.names = ['str','dex','con','int','wis','cha']
 		self.name_err = Exception('Ability not in recognized list')
 		self.val_err = Exception('Ability integer too low or high')
@@ -27,21 +38,21 @@ class class_features:
 	def __init__(self,config):
 		self.names = config['class_names']
 		self.abrv = []
+		#FIXME - hold off on refactoring this as a funct until
+		#There's a better class config file
 		for key, val in self.names.items():
 			self.abrv.append(key)
 
 class skills:
 	def __init__(self,config):
+		self._config = config
 		self.abrv = config.sections()
-		#FIXME - Refactor below as properties at some point!!!
-		#They can just access config directly, rather than via new dicts
-		#This will require a lil work in chara.py
-		#This model also works better than the dict-building in other classes here
-		self.names = dict()
 		self.ability = dict()
 		for x in self.abrv:
-			self.names[x] = config[x]['name']
 			self.ability[x] = config[x]['abi']
+
+	def name(self,abrv):
+		return self._config[abrv]['name']
 
 class level:
 	def __init__(self):

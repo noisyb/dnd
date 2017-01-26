@@ -47,7 +47,7 @@ class character:
 		if section in ['full','ski']:
 			print('----SKILL MODIFIERS----')
 			for x in ruleset.skills.abrv:
-				skill_string = '{:<17} {:>3}'.format(ruleset.skills.names[x] + ': ', str(self.ski_mod(x)))
+				skill_string = '{:<17} {:>3}'.format(ruleset.skills.name(x) + ': ', str(self.ski_mod(x)))
 				if x in self.skills: skill_string += ' X'
 				print(skill_string)
 	
@@ -226,6 +226,7 @@ class character:
 	
 	#Skill modifier per skill
 	def ski_mod(self,skill):
+		#FIXME - return as list of tuples so pretty printing for where stuff came from can happen
 		skill_mod = 0
 		if skill in self.skills: skill_mod += self.prof
 		skill_mod += self.abi_mod(ruleset.skills.ability[skill])
