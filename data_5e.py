@@ -29,8 +29,8 @@ class rules:
 
 class ability_score:
 	def __init__(self):
-		#FIXME - change to abrv
-		self.names = ['str','dex','con','int','wis','cha']
+		#FIXME - change to config file with at least names
+		self.abrv = ['str','dex','con','int','wis','cha']
 		self.name_err = Exception('Ability not in recognized list')
 		self.val_err = Exception('Ability integer too low or high')
 		
@@ -47,12 +47,12 @@ class skills:
 	def __init__(self,config):
 		self._config = config
 		self.abrv = config.sections()
-		self.ability = dict()
-		for x in self.abrv:
-			self.ability[x] = config[x]['abi']
 
 	def name(self,abrv):
 		return self._config[abrv]['name']
+
+	def ability(self,abrv):
+		return self._config[abrv]['abi']
 
 class level:
 	def __init__(self):

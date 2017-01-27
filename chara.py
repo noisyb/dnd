@@ -15,8 +15,8 @@ class character:
 		self._xp = 0
 		#background
 		self.bkg = ''
-		#who plays it (can be dm)
-		self.player = ''
+		#who plays it
+		self.player = 'dm'
 		self._class = ''
 		self._race = ''
 		self.alignment = ''
@@ -41,7 +41,7 @@ class character:
 		print ('Alignment: ' + self.alignment_name)
 		if section in ['full','abi']:
 			print('---ABILITY SCORES---')
-			for x in ruleset.ability_score.names:
+			for x in ruleset.ability_score.abrv:
 				print(x + ': ' + str(self.abi_get(x)) + ' : ' + str(self.abi_mod(x)))
 
 		if section in ['full','ski']:
@@ -161,18 +161,19 @@ class character:
 		for key, val in kwargs.items():
 			if val < 0 or val > 40:
 				raise ruleset.ability_score.val_err
-			if key not in ruleset.ability_score.names:
+			if key not in ruleset.ability_score.abrv:
 				raise ruleset.ability_score.name_err
 			self.abi[key] = val
 
+	#returns actual ability
 	def abi_get(self,ability):
-		if ability not in ruleset.ability_score.names:
+		if ability not in ruleset.ability_score.abrv:
 			raise ruleset.ability_score.name_err
 		return self.abi[ability]
 
 	#Modifier derived from ability score
 	def abi_mod(self,ability):
-		if ability not in ruleset.ability_score.names:
+		if ability not in ruleset.ability_score.abrv:
 			raise ruleset.ability_score.name_err
 		score = self.abi[ability]
 		if score < 10: score -= 1
@@ -232,5 +233,5 @@ class character:
 		#FIXME - return as list of tuples so pretty printing for where stuff came from can happen
 		skill_mod = 0
 		if skill in self.skills: skill_mod += self.prof
-		skill_mod += self.abi_mod(ruleset.skills.ability[skill])
+		skill_mod += self.abi_mod(ruleset.skills.ability(skill))
 		return skill_mod
